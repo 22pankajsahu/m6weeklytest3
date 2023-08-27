@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="PANKAJ SAHU">
+    <title>Whiteboard</title>
+    <meta name="keywords" content="Whiteboard, virtual board, pen, delete, undo">
+    <meta name="description" content="This is a simple web application that allows users to draw on a virtual whiteboard using their mouse. It also provides features to delete the drawing and undo the last action.">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        #whiteboard {
+            border: 1px solid #000;
+            background-color: #fff;
+        }
+
+        #controls {
+            margin-top: 10px;
+        }
+
+        button {
+            margin: 5px;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="whiteboard" style="width: 800px; height: 600px;">
+        <canvas id="canvas" width="800" height="600"></canvas>
+    </div>
+    <div id="controls">
+        <button id="delete">Delete</button>
+        <button id="undo">Undo</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const deleteButton = document.getElementById('delete');
+        const undoButton = document.getElementById('undo');
+
+        let drawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let actions = [];
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        deleteButton.addEventListener('click', clearCanvas);
+        undoButton.addEventListener('click', undoAction);
+
+        function startDrawing(e) {
+            drawing = true;
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+
+        function draw(e) {
+            if (!drawing) return;
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+            actions.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        }
+
+        function stopDrawing() {
+            drawing = false;
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            actions = [];
+        }
+
+        function undoAction() {
+            if (actions.length > 0) {
+                ctx.putImageData(actions.pop(), 0, 0);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
